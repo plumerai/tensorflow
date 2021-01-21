@@ -816,6 +816,10 @@ TfLiteStatus MicroAllocator::PrepareNodeAndRegistrationDataFromFlatbuffer(
       TF_LITE_REPORT_ERROR(error_reporter_,
                            "Failed to get registration from op code %s\n ",
                            EnumNameBuiltinOperator(opcode->builtin_code()));
+      if (opcode->builtin_code() == BuiltinOperator_CUSTOM) {
+        TF_LITE_REPORT_ERROR(error_reporter_, "Custom op code: %s\n",
+                             opcode->custom_code());
+      }
       return status;
     }
     const auto* registration = node_and_registrations[i].registration;
@@ -1093,6 +1097,10 @@ TfLiteStatus MicroAllocator::CommitStaticMemoryPlan(
   GreedyMemoryPlanner planner(planner_arena, remaining_arena_size);
   TF_LITE_ENSURE_STATUS(CreatePlan(error_reporter_, &planner, allocation_info,
                                    allocation_info_count));
+
+#ifdef LCE_PRINT_MEMORY_PLAN
+  planner.PrintMemoryPlan(error_reporter_);
+#endif
 
   // Reset all temp allocations used above:
   memory_allocator_->ResetTempAllocations();

@@ -40,10 +40,11 @@ if ! docker run \
   --log-driver=none -a stdout -a stderr \
   -v ${ROOT_DIR}:/workspace \
   -v /tmp:/tmp \
+  -v ${TEST_TMPDIR}:/home/developer \
   -e BIN=/workspace/$1 \
   -e SCRIPT=/workspace/tensorflow/lite/micro/testing/stm32f4.resc \
   -e EXPECTED="$2" \
-  -it renode_stm32f4 \
+  renode_stm32f4 \
   /bin/bash -c "/opt/renode/tests/test.sh /workspace/tensorflow/lite/micro/testing/stm32f4.robot 2>&1 >${MICRO_LOG_FILENAME}"
 then
   exit_code=1
