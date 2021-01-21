@@ -70,7 +70,7 @@ class MicroProfiler {
   TF_LITE_REMOVE_VIRTUAL_DELETE;
 };
 
-#if defined(NDEBUG)
+#if defined(NDEBUG) && defined(TF_LITE_STRIP_ERROR_STRINGS)
 // For release builds, the ScopedMicroProfiler is a noop.
 //
 // This is done because the ScipedProfiler is used as part of the

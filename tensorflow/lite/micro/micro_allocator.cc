@@ -56,11 +56,17 @@ struct AllocationInfo {
   bool needs_allocating;
 };
 
+#ifdef LCE_RUN_ON_FPGA
+// Efinix Ruby SoC requires alignment to be set to 128-byte boundary.
+constexpr int kBufferAlignment = 128;
+#else
 // We align tensor buffers to 16-byte boundaries, since this is a common
 // requirement for SIMD extensions.
 constexpr int kBufferAlignment = 16;
+#endif
+
 constexpr char kOfflineMemAllocMetadata[] = "OfflineMemoryAllocation";
-const TfLiteIntArray kZeroLengthIntArray = {};
+const TfLiteIntArray kZeroLengthIntArray{0};
 
 class MicroBuiltinDataAllocator : public BuiltinDataAllocator {
  public:
@@ -344,6 +350,10 @@ TfLiteStatus CreatePlan(ErrorReporter* error_reporter,
     if (current->needs_allocating) {
       size_t aligned_bytes_required =
           AlignSizeUp(current->bytes, kBufferAlignment);
+// Add separation between buffers, because Ikva writes additional data.
+#ifdef LCE_RUN_ON_FPGA
+      aligned_bytes_required += kBufferAlignment;
+#endif
       if (current->offline_offset == kOnlinePlannedBuffer) {
         TF_LITE_ENSURE_STATUS(
             planner->AddBuffer(error_reporter, aligned_bytes_required,
@@ -799,6 +809,10 @@ TfLiteStatus MicroAllocator::PrepareNodeAndRegistrationDataFromFlatbuffer(
       TF_LITE_REPORT_ERROR(error_reporter_,
                            "Failed to get registration from op code %s\n ",
                            EnumNameBuiltinOperator(GetBuiltinCode(opcode)));
+      if (GetBuiltinCode(opcode) == BuiltinOperator_CUSTOM) {
+        TF_LITE_REPORT_ERROR(error_reporter_, "Custom op code: %s\n",
+                             opcode->custom_code()->c_str());
+      }
       return status;
     }
     const auto* registration = node_and_registrations[i].registration;
@@ -1076,6 +1090,10 @@ TfLiteStatus MicroAllocator::CommitStaticMemoryPlan(
   GreedyMemoryPlanner planner(planner_arena, remaining_arena_size);
   TF_LITE_ENSURE_STATUS(CreatePlan(error_reporter_, &planner, allocation_info,
                                    allocation_info_count));
+
+#ifdef LCE_PRINT_MEMORY_PLAN
+  planner.PrintMemoryPlan(error_reporter_);
+#endif
 
   // Reset all temp allocations used above:
   memory_allocator_->ResetTempAllocations();
