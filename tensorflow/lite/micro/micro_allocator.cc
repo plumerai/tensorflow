@@ -60,7 +60,7 @@ struct AllocationInfo {
 // requirement for SIMD extensions.
 constexpr int kBufferAlignment = 16;
 constexpr char kOfflineMemAllocMetadata[] = "OfflineMemoryAllocation";
-const TfLiteIntArray kZeroLengthIntArray = {};
+const TfLiteIntArray kZeroLengthIntArray{0};
 
 class MicroBuiltinDataAllocator : public BuiltinDataAllocator {
  public:
@@ -967,6 +967,10 @@ TfLiteStatus MicroAllocator::CommitStaticMemoryPlan(
   GreedyMemoryPlanner planner(planner_arena, remaining_arena_size);
   TF_LITE_ENSURE_STATUS(CreatePlan(error_reporter_, &planner, allocation_info,
                                    allocation_info_count));
+
+#ifdef LCE_PRINT_MEMORY_PLAN
+  planner.PrintMemoryPlan(error_reporter_);
+#endif
 
   // Reset all temp allocations used above:
   memory_allocator_->ResetTempAllocations();
