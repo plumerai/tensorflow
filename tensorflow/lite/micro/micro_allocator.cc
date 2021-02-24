@@ -55,9 +55,15 @@ struct AllocationInfo {
   bool needs_allocating;
 };
 
+#ifdef LCE_RUN_ON_FPGA
+// Efinix Ruby SoC requires alignment to be set to 128-byte boundary. 
+    constexpr int kBufferAlignment = 128;
+#else
 // We align tensor buffers to 16-byte boundaries, since this is a common
 // requirement for SIMD extensions.
-constexpr int kBufferAlignment = 16;
+   constexpr int kBufferAlignment = 16;
+#endif
+
 constexpr char kOfflineMemAllocMetadata[] = "OfflineMemoryAllocation";
 const TfLiteIntArray kZeroLengthIntArray = {};
 
@@ -359,6 +365,10 @@ TfLiteStatus CreatePlan(ErrorReporter* error_reporter,
     if (current->needs_allocating) {
       size_t aligned_bytes_required =
           AlignSizeUp(current->bytes, kBufferAlignment);
+//Adding separation between buffers, because Ikva V1 is writing additional data on top of convolution. 
+#ifdef LCE_RUN_ON_FPGA
+      aligned_bytes_required += kBufferAlignment;
+#endif
       if (current->offline_offset == kOnlinePlannedBuffer) {
         TF_LITE_ENSURE_STATUS(
             planner->AddBuffer(error_reporter, aligned_bytes_required,
