@@ -828,7 +828,7 @@ TfLiteStatus MicroAllocator::PrepareNodeAndRegistrationDataFromFlatbuffer(
                            EnumNameBuiltinOperator(opcode->builtin_code()));
       if (opcode->builtin_code() == BuiltinOperator_CUSTOM) {
         TF_LITE_REPORT_ERROR(error_reporter_, "Custom op code: %s\n",
-                             opcode->custom_code());
+                             opcode->custom_code()->c_str());
       }
       return status;
     }
