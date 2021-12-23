@@ -969,7 +969,7 @@ TfLiteStatus MicroAllocator::CommitStaticMemoryPlan(
                                    allocation_info_count));
 
 #ifdef LCE_PRINT_MEMORY_PLAN
-  planner.PrintMemoryPlan(error_reporter_);
+  planner.PrintMemoryPlan();
 #endif
 
   // Reset all temp allocations used above:
