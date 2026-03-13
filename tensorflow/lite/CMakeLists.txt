@@ -51,7 +51,7 @@ if(NOT TENSORFLOW_SOURCE_DIR)
   FetchContent_Declare(
     tensorflow
     GIT_REPOSITORY https://github.com/tensorflow/tensorflow.git
-    GIT_TAG v2.19.0
+    GIT_TAG v2.21.0
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/tensorflow-src
@@ -785,7 +785,7 @@ target_compile_options(tensorflow-lite
 target_compile_definitions(tensorflow-lite
   PRIVATE
     TF_MAJOR_VERSION=2
-    TF_MINOR_VERSION=19
+    TF_MINOR_VERSION=21
     TF_PATCH_VERSION=0
     TF_VERSION_SUFFIX=""
 )
